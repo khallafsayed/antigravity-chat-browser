@@ -1087,4 +1087,115 @@ body {
   font-size: 0.82rem !important;
 }
 
+/* Language Dropdown */
+.lang-dropdown-wrapper {
+  position: relative;
+}
+
+.btn-lang {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-lang:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-card-hover);
+  color: #a5b4fc;
+}
+
+.lang-icon {
+  font-size: 14px;
+}
+
+.lang-arrow {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.lang-dropdown-wrapper.open .lang-arrow {
+  transform: rotate(180deg);
+}
+
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  padding: 6px;
+  min-width: 140px;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+}
+
+html[dir="ltr"] .lang-menu {
+  left: auto;
+  right: 0;
+}
+
+.lang-menu.show {
+  display: flex;
+}
+
+.lang-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: inherit;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.lang-menu-item:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.lang-menu-item.active {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  font-weight: 600;
+}
+
+/* LTR / RTL Border Adaptations */
+html[dir="ltr"] .projects-panel {
+  border-right: 1px solid var(--border-color);
+  border-left: none;
+}
+
+html[dir="ltr"] .conversations-panel {
+  border-right: 1px solid var(--border-color);
+  border-left: none;
+}
+
+html[dir="ltr"] .toast {
+  left: auto;
+  right: 24px;
+}
+
+
 

@@ -1,0 +1,107 @@
+{
+  "app": {
+    "title": "Antigravity Chat Studio",
+    "badge": "إدارة ومزامنة المحادثات",
+    "language": "العربية",
+    "dir": "rtl"
+  },
+  "stats": {
+    "projects": "المشاريع:",
+    "total_chats": "إجمالي المحادثات:",
+    "starred": "المفضلة ⭐:",
+    "refresh": "تحديث"
+  },
+  "sidebar": {
+    "active_projects": "المشاريع النشطة",
+    "all_chats": "جميع المحادثات",
+    "starred_pinned": "المفضلة والمميزة",
+    "export_tooltip": "تصدير جميع محادثات مشروع {project} إلى مجلد",
+    "delete_tooltip": "حذف جميع محادثات مشروع {project}"
+  },
+  "list": {
+    "search_placeholder": "بحث في عناوين ونصوص المحادثات...",
+    "no_matches": "لا توجد محادثات مطابقة",
+    "star_tooltip": "إضافة للمفضلة",
+    "delete_chat_tooltip": "حذف هذه المحادثة",
+    "time_moments": "منذ لحظات",
+    "time_hours": "منذ {hours} ساعة",
+    "time_yesterday": "أمس",
+    "time_two_days": "منذ يومين",
+    "time_days": "منذ {days} أيام"
+  },
+  "viewer": {
+    "empty_title": "اختر محادثة لعرض تفاصيلها",
+    "empty_desc": "يمكنك تصفية المحادثات حسب المشروع أو البحث عنها وإعادة تسميتها وتصديرها",
+    "rename_btn": "✏️ تسمية",
+    "project_label": "المشروع:",
+    "id_label": "المعرف:",
+    "copy_id_btn": "📋 نسخ الـ ID",
+    "export_md_btn": "📥 تصدير",
+    "session_folder_btn": "📂 مجلد الجلسة",
+    "delete_chat_btn": "🗑️ حذف المحادثة",
+    "user_author": "👤 المستخدم",
+    "agent_author": "⚡ Antigravity Agent",
+    "no_messages": "لا توجد رسائل مسجلة في هذه الجلسة.",
+    "copy_id_toast": "تم نسخ المعرف: {id}... لاستدعائه في Antigravity",
+    "copy_id_full_toast": "تم نسخ المعرف: {id}"
+  },
+  "modals": {
+    "cancel": "إلغاء",
+    "rename": {
+      "title": "إعادة تسمية المحادثة",
+      "placeholder": "أدخل اسماً مميزاً للمحادثة...",
+      "save_btn": "حفظ التسمية"
+    },
+    "delete": {
+      "title": "تأكيد الحذف",
+      "subtitle_chat": "حذف محادثة مفردة",
+      "subtitle_project": "حذف مشروع كامل",
+      "desc_chat": "هل أنت متأكد من رغبتك في حذف هذه المحادثة نهائياً من سجلات Antigravity؟",
+      "desc_project": "هل أنت متأكد من رغبتك في حذف جميع المحادثات التابعة لمشروع \"{project}\"؟",
+      "title_label": "العنوان:",
+      "id_label": "معرف الجلسة (ID):",
+      "project_label": "المشروع:",
+      "chats_count_label": "عدد المحادثات التي سيتم حذفها:",
+      "project_safe_notice": "💡 تنبيه للأمان: هذا الإجراء يحذف سجلات ومحادثات Antigravity فقط، ولن يتم المساس أو حذف أي من ملفات الكود البرمجي للمشروع المخزنة على جهازك.",
+      "warning_chat": "⚠️ سيتم حذف ملفات الجلسة وسجلاتها ومجلد الـ brain وقاعدة البيانات المرتبطة بها نهائياً.",
+      "warning_project": "⚠️ سيتم حذف ملفات الـ brain وسجلات كافة محادثات هذا المشروع نهائياً.",
+      "confirm_chat_btn": "حذف المحادثة نهائياً",
+      "confirm_project_btn": "حذف المشروع ({count} محادثة)",
+      "deleting_state": "جاري الحذف..."
+    },
+    "export": {
+      "title": "تصدير محادثات المشروع",
+      "subtitle": "مشروع: {project} ({count} محادثة)",
+      "desc": "سيتم نسخ كافة ملفات وسجلات المحادثات، ملفات الـ Brain، وقواعد بيانات الجلسات إلى المجلد الذي تحدده أدناه:",
+      "dest_label": "مجلد الوجهة لحفظ المحادثات (Destination Folder):",
+      "dest_placeholder": "اختر أو اكتب مسار المجلد (مثال: D:\\Backups)",
+      "browse_btn": "📁 تصفح...",
+      "browsing_btn": "جاري الفتح...",
+      "opt_markdown": "توليد وتصدير ملفات Markdown سهلة القراءة لكل محادثة (.md)",
+      "opt_raw": "نسخ مجلدات الـ Brain الأصلية وسجلات JSONL وقواعد بيانات SQLite",
+      "start_btn": "بدء التصدير 📥",
+      "exporting_btn": "جاري النسخ والتصدير... ⏳",
+      "done_btn": "تم التصدير بنجاح ✅",
+      "open_folder_btn": "📂 فتح المجلد المُصدّر في Windows Explorer",
+      "success_msg": "✅ <strong>تم التصدير بنجاح!</strong><br>تم نسخ <strong>{count}</strong> محادثة بكافة ملفاتها إلى:"
+    }
+  },
+  "toasts": {
+    "copied": "تم النسخ بنجاح!",
+    "star_added": "تمت الإضافة إلى المفضلة ⭐",
+    "star_removed": "تمت الإزالة من المفضلة",
+    "rename_saved": "تم حفظ الاسم الجديد بنجاح! ✏️",
+    "folder_opened": "تم فتح مجلد الجلسة في Windows Explorer 📂",
+    "md_exported": "تم تصدير ملف Markdown بنجاح! 📥",
+    "refreshed": "تم تحديث البيانات من الجلسات",
+    "chat_deleted": "تم حذف المحادثة وسجلاتها بنجاح 🗑️",
+    "project_deleted": "تم حذف مشروع \"{project}\" ({count} محادثة) بنجاح 🗑️",
+    "project_exported": "تم تصدير مشروع \"{project}\" بنجاح! 📦",
+    "error_delete_chat": "تعذر حذف المحادثة",
+    "error_delete_project": "تعذر حذف المشروع",
+    "error_export": "حدث خطأ أثناء التصدير",
+    "error_export_connection": "فشل الاتصال بالخادم أثناء التصدير",
+    "error_open_folder": "تعذر فتح المجلد",
+    "prompt_select_dest": "يرجى كتابة أو اختيار مسار مجلد الوجهة"
+  }
+}

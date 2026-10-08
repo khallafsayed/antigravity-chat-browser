@@ -651,9 +651,36 @@ const server = http.createServer((req, res) => {
     });
   }
 
+  // Locales discovery endpoint
+  if (pathname === '/api/locales' && req.method === 'GET') {
+    const localesDir = path.join(PUBLIC_DIR, 'locales');
+    const languages = [];
+    if (fs.existsSync(localesDir)) {
+      const files = fs.readdirSync(localesDir);
+      for (const f of files) {
+        if (f.endsWith('.json')) {
+          const code = f.replace('.json', '');
+          try {
+            const data = JSON.parse(fs.readFileSync(path.join(localesDir, f), 'utf8'));
+            languages.push({
+              code,
+              name: data.app && data.app.language ? data.app.language : code.toUpperCase(),
+              dir: data.app && data.app.dir ? data.app.dir : 'ltr'
+            });
+          } catch (e) {}
+        }
+      }
+    }
+    return sendJson(languages);
+  }
+
   // Static File Serving
   let filePath = path.join(PUBLIC_DIR, pathname === '/' ? 'index.html' : pathname);
   if (!fs.existsSync(filePath)) {
+    if (path.extname(pathname)) {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      return res.end('Not Found');
+    }
     filePath = path.join(PUBLIC_DIR, 'index.html');
   }
 

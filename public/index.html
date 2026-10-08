@@ -14,29 +14,41 @@
   <header class="app-header">
     <div class="brand">
       <div class="brand-logo">⚡</div>
-      <div class="brand-title">Antigravity Chat Studio</div>
-      <span class="brand-badge">إدارة ومزامنة المحادثات</span>
+      <div class="brand-title" data-i18n="app.title">Antigravity Chat Studio</div>
+      <span class="brand-badge" data-i18n="app.badge">إدارة ومزامنة المحادثات</span>
     </div>
 
     <div class="header-stats">
       <div class="stat-pill">
-        <span>المشاريع:</span>
+        <span data-i18n="stats.projects">المشاريع:</span>
         <span class="stat-num" id="statProjects">0</span>
       </div>
       <div class="stat-pill">
-        <span>إجمالي المحادثات:</span>
+        <span data-i18n="stats.total_chats">إجمالي المحادثات:</span>
         <span class="stat-num" id="statConvs">0</span>
       </div>
       <div class="stat-pill">
-        <span>المفضلة ⭐:</span>
+        <span data-i18n="stats.starred">المفضلة ⭐:</span>
         <span class="stat-num" id="statStarred">0</span>
       </div>
-      <button class="btn-refresh" id="btnRefresh" title="تحديث السجلات">
+      <button class="btn-refresh" id="btnRefresh" title="تحديث السجلات" data-i18n-title="stats.refresh">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
         </svg>
-        تحديث
+        <span data-i18n="stats.refresh">تحديث</span>
       </button>
+
+      <!-- Language Selector -->
+      <div class="lang-dropdown-wrapper">
+        <button class="btn-lang" id="btnLangToggle" title="Language / تغيير اللغة">
+          <span class="lang-icon">🌐</span>
+          <span id="currentLangLabel">العربية</span>
+          <span class="lang-arrow">▾</span>
+        </button>
+        <div class="lang-menu" id="langMenu">
+          <!-- Rendered dynamically from /api/locales -->
+        </div>
+      </div>
     </div>
   </header>
 
@@ -46,7 +58,7 @@
     <!-- Column 1: Projects Sidebar -->
     <aside class="projects-panel">
       <div class="panel-header">
-        <span>المشاريع النشطة</span>
+        <span data-i18n="sidebar.active_projects">المشاريع النشطة</span>
         <span id="projectsCountBadge" class="brand-badge">0</span>
       </div>
       <ul class="projects-list" id="projectsList">
@@ -62,7 +74,7 @@
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="searchInput" placeholder="بحث في عناوين ونصوص المحادثات...">
+          <input type="text" id="searchInput" placeholder="بحث في عناوين ونصوص المحادثات..." data-i18n-placeholder="list.search_placeholder">
         </div>
       </div>
       <div class="conversations-list" id="conversationsList">
@@ -74,8 +86,8 @@
     <section class="chat-viewer" id="chatViewer">
       <div class="chat-empty-state" id="emptyState">
         <div class="chat-empty-icon">💬</div>
-        <h3>اختر محادثة لعرض تفاصيلها</h3>
-        <p>يمكنك تصفية المحادثات حسب المشروع أو البحث عنها وإعادة تسميتها</p>
+        <h3 data-i18n="viewer.empty_title">اختر محادثة لعرض تفاصيلها</h3>
+        <p data-i18n="viewer.empty_desc">يمكنك تصفية المحادثات حسب المشروع أو البحث عنها وإعادة تسميتها وتصديرها</p>
       </div>
 
       <!-- Active Chat Content -->
@@ -85,27 +97,27 @@
           <div class="chat-header-info">
             <div class="chat-header-title-row">
               <h2 class="chat-header-title" id="chatTitle">عنوان المحادثة</h2>
-              <button class="btn-rename" id="btnOpenRename" title="تغيير اسم المحادثة">
+              <button class="btn-rename" id="btnOpenRename" title="تغيير اسم المحادثة" data-i18n="viewer.rename_btn">
                 ✏️ تسمية
               </button>
             </div>
             <div class="chat-header-meta">
-              <span>المشروع: <strong id="chatProject" style="color: #cbd5e1;"></strong></span>
+              <span><span data-i18n="viewer.project_label">المشروع:</span> <strong id="chatProject" style="color: #cbd5e1;"></strong></span>
               <span>•</span>
-              <span>المعرف: <code class="id-badge" id="chatIdBadge" title="انقر لنسخ المعرف لاستدعائه في Antigravity"></code></span>
+              <span><span data-i18n="viewer.id_label">المعرف:</span> <code class="id-badge" id="chatIdBadge"></code></span>
             </div>
           </div>
           <div class="chat-actions">
-            <button class="action-btn" id="btnCopyId" title="نسخ المعرف">
+            <button class="action-btn" id="btnCopyId" title="نسخ المعرف" data-i18n="viewer.copy_id_btn">
               📋 نسخ الـ ID
             </button>
-            <button class="action-btn" id="btnExportMd" title="تصدير كملف Markdown">
+            <button class="action-btn" id="btnExportMd" title="تصدير كملف Markdown" data-i18n="viewer.export_md_btn">
               📥 تصدير
             </button>
-            <button class="action-btn" id="btnOpenFolder" title="فتح مجلد الجلسة في Windows Explorer">
+            <button class="action-btn" id="btnOpenFolder" title="فتح مجلد الجلسة في Windows Explorer" data-i18n="viewer.session_folder_btn">
               📂 مجلد الجلسة
             </button>
-            <button class="action-btn btn-danger-action" id="btnDeleteChat" title="حذف هذه المحادثة نهائياً">
+            <button class="action-btn btn-danger-action" id="btnDeleteChat" title="حذف هذه المحادثة نهائياً" data-i18n="viewer.delete_chat_btn">
               🗑️ حذف المحادثة
             </button>
           </div>
@@ -123,11 +135,11 @@
   <!-- Rename Modal -->
   <div class="modal-overlay" id="renameModal">
     <div class="modal-box">
-      <h3 class="modal-title">إعادة تسمية المحادثة</h3>
-      <input type="text" class="modal-input" id="renameInput" placeholder="أدخل اسماً مميزاً للمحادثة...">
+      <h3 class="modal-title" data-i18n="modals.rename.title">إعادة تسمية المحادثة</h3>
+      <input type="text" class="modal-input" id="renameInput" placeholder="أدخل اسماً مميزاً للمحادثة..." data-i18n-placeholder="modals.rename.placeholder">
       <div class="modal-actions">
-        <button class="btn-secondary" id="btnCancelRename">إلغاء</button>
-        <button class="btn-primary" id="btnSaveRename">حفظ التسمية</button>
+        <button class="btn-secondary" id="btnCancelRename" data-i18n="modals.cancel">إلغاء</button>
+        <button class="btn-primary" id="btnSaveRename" data-i18n="modals.rename.save_btn">حفظ التسمية</button>
       </div>
     </div>
   </div>
@@ -138,16 +150,16 @@
       <div class="modal-danger-header">
         <div class="modal-danger-icon">🗑️</div>
         <div>
-          <h3 class="modal-title" id="deleteModalTitle">تأكيد الحذف</h3>
-          <p class="modal-subtitle" id="deleteModalType">حذف محادثة</p>
+          <h3 class="modal-title" id="deleteModalTitle" data-i18n="modals.delete.title">تأكيد الحذف</h3>
+          <p class="modal-subtitle" id="deleteModalType"></p>
         </div>
       </div>
-      <p class="modal-desc" id="deleteModalDesc">هل أنت متأكد من رغبتك في حذف هذا العنصر نهائياً؟</p>
+      <p class="modal-desc" id="deleteModalDesc"></p>
       <div class="delete-info-card" id="deleteModalInfo"></div>
-      <p class="delete-warning-note" id="deleteModalWarning">⚠️ هذا الإجراء نهائي ولا يمكن التراجع عنه.</p>
+      <p class="delete-warning-note" id="deleteModalWarning"></p>
       <div class="modal-actions">
-        <button class="btn-secondary" id="btnCancelDelete">إلغاء</button>
-        <button class="btn-danger-confirm" id="btnConfirmDelete">حذف نهائي</button>
+        <button class="btn-secondary" id="btnCancelDelete" data-i18n="modals.cancel">إلغاء</button>
+        <button class="btn-danger-confirm" id="btnConfirmDelete"></button>
       </div>
     </div>
   </div>
@@ -158,20 +170,20 @@
       <div class="modal-export-header">
         <div class="modal-export-icon">📦</div>
         <div>
-          <h3 class="modal-title">تصدير محادثات المشروع</h3>
+          <h3 class="modal-title" data-i18n="modals.export.title">تصدير محادثات المشروع</h3>
           <p class="modal-subtitle" id="exportProjectName" style="color: #818cf8;">اسم المشروع</p>
         </div>
       </div>
       
-      <p class="modal-desc">
+      <p class="modal-desc" data-i18n="modals.export.desc">
         سيتم نسخ كافة ملفات وسجلات المحادثات، ملفات الـ Brain، وقواعد بيانات الجلسات إلى المجلد الذي تحدده أدناه:
       </p>
 
       <div class="export-field-group">
-        <label class="field-label">مجلد الوجهة لحفظ المحادثات (Destination Folder):</label>
+        <label class="field-label" data-i18n="modals.export.dest_label">مجلد الوجهة لحفظ المحادثات (Destination Folder):</label>
         <div class="folder-input-wrapper">
-          <input type="text" class="modal-input folder-input" id="exportDestInput" placeholder="اختر أو اكتب مسار المجلد (مثال: D:\Backups)">
-          <button class="btn-browse" id="btnBrowseFolder" type="button" title="استعراض مجلدات الجهاز">
+          <input type="text" class="modal-input folder-input" id="exportDestInput" placeholder="اختر أو اكتب مسار المجلد (مثال: D:\Backups)" data-i18n-placeholder="modals.export.dest_placeholder">
+          <button class="btn-browse" id="btnBrowseFolder" type="button" title="استعراض مجلدات الجهاز" data-i18n="modals.export.browse_btn">
             📁 تصفح...
           </button>
         </div>
@@ -180,31 +192,31 @@
       <div class="export-options">
         <label class="checkbox-label">
           <input type="checkbox" id="chkIncludeMarkdown" checked>
-          <span>توليد وتصدير ملفات Markdown سهلة القراءة لكل محادثة (.md)</span>
+          <span data-i18n="modals.export.opt_markdown">توليد وتصدير ملفات Markdown سهلة القراءة لكل محادثة (.md)</span>
         </label>
         <label class="checkbox-label">
           <input type="checkbox" id="chkCopyRawBrain" checked disabled>
-          <span>نسخ مجلدات الـ Brain الأصلية وسجلات JSONL وقواعد بيانات SQLite</span>
+          <span data-i18n="modals.export.opt_raw">نسخ مجلدات الـ Brain الأصلية وسجلات JSONL وقواعد بيانات SQLite</span>
         </label>
       </div>
 
       <!-- Result / Success Box -->
       <div class="export-result-box" id="exportResultBox" style="display: none;">
         <div class="export-result-status" id="exportResultStatus"></div>
-        <button class="btn-secondary btn-sm" id="btnOpenExportedFolder" type="button" style="margin-top: 10px;">
+        <button class="btn-secondary btn-sm" id="btnOpenExportedFolder" type="button" style="margin-top: 10px;" data-i18n="modals.export.open_folder_btn">
           📂 فتح المجلد المُصدّر في Windows Explorer
         </button>
       </div>
 
       <div class="modal-actions" id="exportModalActions">
-        <button class="btn-secondary" id="btnCancelExport">إلغاء</button>
-        <button class="btn-primary" id="btnConfirmExport">بدء التصدير 📥</button>
+        <button class="btn-secondary" id="btnCancelExport" data-i18n="modals.cancel">إلغاء</button>
+        <button class="btn-primary" id="btnConfirmExport" data-i18n="modals.export.start_btn">بدء التصدير 📥</button>
       </div>
     </div>
   </div>
 
   <!-- Toast Notification -->
-  <div class="toast" id="toast">تم النسخ بنجاح!</div>
+  <div class="toast" id="toast"></div>
 
   <script src="app.js"></script>
 </body>

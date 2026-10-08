@@ -51,7 +51,18 @@ However, the default sidebar in Antigravity IDE lacks:
 - 📦 **Full Project Backup & Export:**
   - Copy all session files (`brain/`), trajectory databases (`conversations_db/`), and generate offline-readable Markdown files (`transcripts_markdown/`).
   - Native Windows Folder Browser (`FolderBrowserDialog`) allows picking any destination folder on your machine with one click.
+- 🌐 **Multi-Language Support (i18n):** Native Arabic and English support with automatic RTL/LTR layout adjustment. Easily extendable to any language simply by adding a new JSON file!
 - ⚡ **Zero External Dependencies:** Built entirely with Node.js standard libraries (`node:http`, `node:fs`, `node:sqlite`, `node:child_process`). No `npm install` needed!
+
+---
+
+## 🌐 Adding New Languages (Modular i18n)
+
+Antigravity Chat Studio makes localization effortless. Anyone can add a new language without touching JavaScript or HTML:
+
+1. Copy `public/locales/en.json` to `public/locales/<lang-code>.json` (e.g. `fr.json`, `es.json`, `de.json`).
+2. Translate the values into your language. Set `"dir": "rtl"` or `"dir": "ltr"` and provide the language name in `"app.language"`.
+3. Restart or reload the dashboard! The backend automatically discovers the new JSON file via `/api/locales` and adds it to the language switcher dropdown.
 
 ---
 
@@ -89,7 +100,10 @@ antigravity-chat-browser/
 ├── public/                 # Modern web frontend (Vanilla JS, CSS & HTML)
 │   ├── index.html          # Main application dashboard layout & modals
 │   ├── style.css           # Premium Win11 Fluent dark-theme styling
-│   └── app.js              # Reactive state, API integrations & UI handling
+│   ├── app.js              # Reactive state, API integrations & UI handling
+│   └── locales/            # Modular JSON translation files
+│       ├── ar.json         # Arabic locale & RTL layout
+│       └── en.json         # English locale & LTR layout
 ├── data/
 │   ├── custom_meta.json    # Local store for custom conversation titles & stars
 │   └── custom_meta.example.json

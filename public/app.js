@@ -1,10 +1,16 @@
-// Antigravity Chat Browser Frontend Application
+// Antigravity Chat Browser Frontend Application with Modular i18n
 
+// Application State
 let currentProject = 'all';
 let currentConvId = null;
 let currentConvData = null;
 let projects = [];
 let conversations = [];
+
+// Internationalization (i18n) State
+let currentLang = localStorage.getItem('ag_lang') || 'ar';
+let availableLocales = [];
+const translations = {};
 
 // DOM Elements
 const projectsList = document.getElementById('projectsList');
@@ -19,6 +25,11 @@ const messagesContainer = document.getElementById('messagesContainer');
 const renameModal = document.getElementById('renameModal');
 const renameInput = document.getElementById('renameInput');
 const toast = document.getElementById('toast');
+
+// Language Switcher Elements
+const btnLangToggle = document.getElementById('btnLangToggle');
+const currentLangLabel = document.getElementById('currentLangLabel');
+const langMenu = document.getElementById('langMenu');
 
 // Deletion Elements
 const deleteModal = document.getElementById('deleteModal');
@@ -53,7 +64,148 @@ const statConvs = document.getElementById('statConvs');
 const statStarred = document.getElementById('statStarred');
 const projectsCountBadge = document.getElementById('projectsCountBadge');
 
-// Format relative date in Arabic
+// ==========================================
+// 🌐 i18n Translation Engine
+// ==========================================
+
+// Translation lookup helper
+function t(key, params = {}) {
+  const keys = key.split('.');
+  let val = translations[currentLang];
+  for (const k of keys) {
+    if (val && typeof val === 'object') {
+      val = val[k];
+    } else {
+      val = null;
+      break;
+    }
+  }
+
+  // Fallback to Arabic if key missing in current language
+  if (typeof val !== 'string') {
+    let fallback = translations['ar'];
+    for (const k of keys) {
+      if (fallback && typeof fallback === 'object') {
+        fallback = fallback[k];
+      } else {
+        fallback = null;
+        break;
+      }
+    }
+    val = typeof fallback === 'string' ? fallback : key;
+  }
+
+  // Parameter replacement
+  for (const [pk, pv] of Object.entries(params)) {
+    val = val.replaceAll(`{${pk}}`, pv);
+  }
+  return val;
+}
+
+// Fetch language JSON
+async function loadLocale(lang) {
+  if (translations[lang]) return translations[lang];
+  try {
+    const res = await fetch(`/locales/${lang}.json`);
+    if (!res.ok) throw new Error(`Locale file not found: ${lang}`);
+    const data = await res.json();
+    translations[lang] = data;
+    return data;
+  } catch (err) {
+    console.error(`Error loading locale ${lang}:`, err);
+    if (lang !== 'ar') return loadLocale('ar');
+    return null;
+  }
+}
+
+// Fetch list of available language files from backend
+async function fetchAvailableLocales() {
+  try {
+    const res = await fetch('/api/locales');
+    if (res.ok) {
+      availableLocales = await res.json();
+    }
+  } catch (e) {}
+
+  if (!availableLocales || availableLocales.length === 0) {
+    availableLocales = [
+      { code: 'ar', name: 'العربية', dir: 'rtl' },
+      { code: 'en', name: 'English', dir: 'ltr' }
+    ];
+  }
+  renderLangMenu();
+}
+
+// Render Language Menu
+function renderLangMenu() {
+  if (!langMenu) return;
+  langMenu.innerHTML = availableLocales.map(l => `
+    <button class="lang-menu-item ${l.code === currentLang ? 'active' : ''}" onclick="setLanguage('${l.code}')">
+      <span>${escapeHtml(l.name)}</span>
+      ${l.code === currentLang ? '<span>✓</span>' : ''}
+    </button>
+  `).join('');
+}
+
+// Switch and Apply Language
+async function setLanguage(lang) {
+  await loadLocale(lang);
+  currentLang = lang;
+  localStorage.setItem('ag_lang', lang);
+
+  const langMeta = translations[lang]?.app;
+  const dir = langMeta?.dir || (lang === 'ar' ? 'rtl' : 'ltr');
+
+  document.documentElement.lang = lang;
+  document.documentElement.dir = dir;
+
+  if (currentLangLabel) {
+    currentLangLabel.textContent = langMeta?.language || lang.toUpperCase();
+  }
+
+  // Update all data-i18n elements in DOM
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key) el.textContent = t(key);
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (key) el.placeholder = t(key);
+  });
+
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    if (key) el.title = t(key);
+  });
+
+  // Re-render dynamic components
+  renderLangMenu();
+  renderProjects();
+  renderConversations();
+  if (currentConvData) {
+    renderConversationView(currentConvData);
+  }
+
+  // Close dropdown if open
+  document.querySelector('.lang-dropdown-wrapper')?.classList.remove('open');
+  langMenu?.classList.remove('show');
+}
+
+// Toggle Language Dropdown
+btnLangToggle?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const wrapper = document.querySelector('.lang-dropdown-wrapper');
+  wrapper?.classList.toggle('open');
+  langMenu?.classList.toggle('show');
+});
+
+document.addEventListener('click', () => {
+  document.querySelector('.lang-dropdown-wrapper')?.classList.remove('open');
+  langMenu?.classList.remove('show');
+});
+
+// Format relative date with i18n
 function formatRelativeDate(isoStr) {
   if (!isoStr) return '';
   const date = new Date(isoStr);
@@ -62,12 +214,14 @@ function formatRelativeDate(isoStr) {
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffHours < 1) return 'منذ لحظات';
-  if (diffHours < 24) return `منذ ${diffHours} ساعة`;
-  if (diffDays === 1) return 'أمس';
-  if (diffDays === 2) return 'منذ يومين';
-  if (diffDays < 7) return `منذ ${diffDays} أيام`;
-  return date.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric', year: 'numeric' });
+  if (diffHours < 1) return t('list.time_moments');
+  if (diffHours < 24) return t('list.time_hours', { hours: diffHours });
+  if (diffDays === 1) return t('list.time_yesterday');
+  if (diffDays === 2) return t('list.time_two_days');
+  if (diffDays < 7) return t('list.time_days', { days: diffDays });
+
+  const locale = currentLang === 'ar' ? 'ar-EG' : 'en-US';
+  return date.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function showToast(msg) {
@@ -82,18 +236,13 @@ function parseMarkdown(text) {
   if (window.marked && typeof window.marked.parse === 'function') {
     return window.marked.parse(text);
   }
-  // Simple fallback
   let html = text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
-  // Code blocks
   html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
-  // Inline code
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-  // Bold
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  // Line breaks
   html = html.replace(/\n/g, '<br>');
   return html;
 }
@@ -156,14 +305,14 @@ function renderProjects() {
     <li class="project-item ${currentProject === 'all' ? 'active' : ''}" onclick="selectProject('all')">
       <div class="project-info">
         <span class="project-icon">📁</span>
-        <span class="project-name">جميع المحادثات</span>
+        <span class="project-name">${t('sidebar.all_chats')}</span>
       </div>
       <span class="project-count">${totalCount}</span>
     </li>
     <li class="project-item ${currentProject === 'starred' ? 'active' : ''}" onclick="selectProject('starred')">
       <div class="project-info">
         <span class="project-icon">⭐</span>
-        <span class="project-name">المفضلة والمميزة</span>
+        <span class="project-name">${t('sidebar.starred_pinned')}</span>
       </div>
       <span class="project-count" id="starredSideCount">-</span>
     </li>
@@ -180,10 +329,10 @@ function renderProjects() {
         </div>
         <div class="project-actions-row">
           <span class="project-count">${p.count}</span>
-          <button class="export-project-btn" onclick="openExportProjectModal(event, '${escapeHtml(p.name)}', ${p.count})" title="تصدير جميع محادثات مشروع ${escapeHtml(p.name)} إلى مجلد">
+          <button class="export-project-btn" onclick="openExportProjectModal(event, '${escapeHtml(p.name)}', ${p.count})" title="${t('sidebar.export_tooltip', { project: escapeHtml(p.name) })}">
             📦
           </button>
-          <button class="delete-project-btn" onclick="openDeleteProjectModal(event, '${escapeHtml(p.name)}', ${p.count})" title="حذف جميع محادثات مشروع ${escapeHtml(p.name)}">
+          <button class="delete-project-btn" onclick="openDeleteProjectModal(event, '${escapeHtml(p.name)}', ${p.count})" title="${t('sidebar.delete_tooltip', { project: escapeHtml(p.name) })}">
             🗑️
           </button>
         </div>
@@ -206,7 +355,7 @@ function renderConversations() {
     conversationsList.innerHTML = `
       <div style="text-align: center; color: var(--text-muted); padding: 40px 10px;">
         <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
-        <p>لا توجد محادثات مطابقة</p>
+        <p>${t('list.no_matches')}</p>
       </div>
     `;
     return;
@@ -226,10 +375,10 @@ function renderConversations() {
             ${escapeHtml(c.title)}
           </div>
           <div style="display: flex; align-items: center; gap: 4px;">
-            <button class="star-btn ${starCls}" onclick="toggleStar(event, '${c.id}')" title="إضافة للمفضلة">
+            <button class="star-btn ${starCls}" onclick="toggleStar(event, '${c.id}')" title="${t('list.star_tooltip')}">
               ${starIcon}
             </button>
-            <button class="delete-btn" onclick="openDeleteConvModal(event, '${c.id}', '${escapeHtml(c.title)}')" title="حذف هذه المحادثة">
+            <button class="delete-btn" onclick="openDeleteConvModal(event, '${c.id}', '${escapeHtml(c.title)}')" title="${t('list.delete_chat_tooltip')}">
               🗑️
             </button>
           </div>
@@ -261,13 +410,14 @@ function renderConversationView(data) {
   chatProject.textContent = data.project;
   chatProject.title = data.projectPath;
   chatIdBadge.textContent = data.id.slice(0, 8) + '...';
-  chatIdBadge.title = `انقر لنسخ المعرف: ${data.id}`;
+  chatIdBadge.title = t('viewer.copy_id_full_toast', { id: data.id });
 
   if (!data.messages || data.messages.length === 0) {
-    messagesContainer.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 40px;">لا توجد رسائل مسجلة في هذه الجلسة.</div>';
+    messagesContainer.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 40px;">${t('viewer.no_messages')}</div>`;
     return;
   }
 
+  const locale = currentLang === 'ar' ? 'ar-EG' : 'en-US';
   let html = '';
   data.messages.forEach(m => {
     if (m.type === 'user') {
@@ -275,9 +425,9 @@ function renderConversationView(data) {
         <div class="message-bubble user">
           <div class="msg-header">
             <div class="msg-author">
-              <span class="author-badge-user">👤 المستخدم</span>
+              <span class="author-badge-user">${t('viewer.user_author')}</span>
             </div>
-            <span>${m.time ? new Date(m.time).toLocaleTimeString('ar-EG') : ''}</span>
+            <span>${m.time ? new Date(m.time).toLocaleTimeString(locale) : ''}</span>
           </div>
           <div class="msg-body">
             <div style="white-space: pre-wrap;">${escapeHtml(m.text)}</div>
@@ -289,9 +439,9 @@ function renderConversationView(data) {
         <div class="message-bubble assistant">
           <div class="msg-header">
             <div class="msg-author">
-              <span class="author-badge-assistant">⚡ Antigravity Agent</span>
+              <span class="author-badge-assistant">${t('viewer.agent_author')}</span>
             </div>
-            <span>${m.time ? new Date(m.time).toLocaleTimeString('ar-EG') : ''}</span>
+            <span>${m.time ? new Date(m.time).toLocaleTimeString(locale) : ''}</span>
           </div>
           <div class="msg-body markdown-content">
             ${parseMarkdown(m.text)}
@@ -322,7 +472,6 @@ function renderConversationView(data) {
   });
 
   messagesContainer.innerHTML = html;
-  // scroll to top
   messagesContainer.scrollTop = 0;
 }
 
@@ -337,7 +486,7 @@ async function toggleStar(e, id) {
       if (item) item.starred = data.starred;
       renderConversations();
       fetchStats();
-      showToast(data.starred ? 'تمت الإضافة إلى المفضلة ⭐' : 'تمت الإزالة من المفضلة');
+      showToast(data.starred ? t('toasts.star_added') : t('toasts.star_removed'));
     }
   } catch (err) {
     console.error('Error toggling star:', err);
@@ -345,18 +494,18 @@ async function toggleStar(e, id) {
 }
 
 // Rename Modal
-document.getElementById('btnOpenRename').addEventListener('click', () => {
+document.getElementById('btnOpenRename')?.addEventListener('click', () => {
   if (!currentConvData) return;
   renameInput.value = currentConvData.customTitle || currentConvData.title;
   renameModal.classList.add('active');
   renameInput.focus();
 });
 
-document.getElementById('btnCancelRename').addEventListener('click', () => {
+document.getElementById('btnCancelRename')?.addEventListener('click', () => {
   renameModal.classList.remove('active');
 });
 
-document.getElementById('btnSaveRename').addEventListener('click', async () => {
+document.getElementById('btnSaveRename')?.addEventListener('click', async () => {
   if (!currentConvData) return;
   const newTitle = renameInput.value.trim();
   if (!newTitle) return;
@@ -379,7 +528,7 @@ document.getElementById('btnSaveRename').addEventListener('click', async () => {
       }
       renderConversations();
       renameModal.classList.remove('active');
-      showToast('تم حفظ الاسم الجديد بنجاح! ✏️');
+      showToast(t('toasts.rename_saved'));
     }
   } catch (err) {
     console.error('Error renaming conversation:', err);
@@ -387,41 +536,41 @@ document.getElementById('btnSaveRename').addEventListener('click', async () => {
 });
 
 // Copy ID
-document.getElementById('btnCopyId').addEventListener('click', () => {
+document.getElementById('btnCopyId')?.addEventListener('click', () => {
   if (!currentConvData) return;
   navigator.clipboard.writeText(currentConvData.id).then(() => {
-    showToast(`تم نسخ المعرف: ${currentConvData.id.slice(0, 8)}... لاستدعائه في Antigravity`);
+    showToast(t('viewer.copy_id_toast', { id: currentConvData.id.slice(0, 8) }));
   });
 });
 
-chatIdBadge.addEventListener('click', () => {
+chatIdBadge?.addEventListener('click', () => {
   if (!currentConvData) return;
   navigator.clipboard.writeText(currentConvData.id).then(() => {
-    showToast(`تم نسخ المعرف: ${currentConvData.id}`);
+    showToast(t('viewer.copy_id_full_toast', { id: currentConvData.id }));
   });
 });
 
 // Open Folder in Explorer
-document.getElementById('btnOpenFolder').addEventListener('click', async () => {
+document.getElementById('btnOpenFolder')?.addEventListener('click', async () => {
   if (!currentConvData) return;
   try {
     await fetch(`/api/conversations/${currentConvData.id}/open-folder`, { method: 'POST' });
-    showToast('تم فتح مجلد الجلسة في Windows Explorer 📂');
+    showToast(t('toasts.folder_opened'));
   } catch (e) {}
 });
 
 // Export as Markdown
-document.getElementById('btnExportMd').addEventListener('click', () => {
+document.getElementById('btnExportMd')?.addEventListener('click', () => {
   if (!currentConvData) return;
   let md = `# ${currentConvData.title}\n\n`;
-  md += `**المشروع:** ${currentConvData.project} (${currentConvData.projectPath})\n`;
-  md += `**معرف الجلسة:** \`${currentConvData.id}\`\n\n---\n\n`;
+  md += `**${t('viewer.project_label')}** ${currentConvData.project} (${currentConvData.projectPath})\n`;
+  md += `**${t('viewer.id_label')}** \`${currentConvData.id}\`\n\n---\n\n`;
 
   currentConvData.messages.forEach(m => {
     if (m.type === 'user') {
-      md += `### 👤 المستخدم:\n${m.text}\n\n`;
+      md += `### ${t('viewer.user_author')}:\n${m.text}\n\n`;
     } else if (m.type === 'assistant') {
-      md += `### ⚡ المساعد (Antigravity):\n${m.text}\n\n`;
+      md += `### ${t('viewer.agent_author')}:\n${m.text}\n\n`;
     }
   });
 
@@ -430,12 +579,12 @@ document.getElementById('btnExportMd').addEventListener('click', () => {
   a.href = URL.createObjectURL(blob);
   a.download = `${currentConvData.title.slice(0, 30).replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '_')}_transcript.md`;
   a.click();
-  showToast('تم تصدير ملف Markdown بنجاح! 📥');
+  showToast(t('toasts.md_exported'));
 });
 
 // Search input
 let searchTimeout = null;
-searchInput.addEventListener('input', () => {
+searchInput?.addEventListener('input', () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
     fetchConversations();
@@ -443,26 +592,26 @@ searchInput.addEventListener('input', () => {
 });
 
 // Refresh button
-document.getElementById('btnRefresh').addEventListener('click', () => {
+document.getElementById('btnRefresh')?.addEventListener('click', () => {
   fetchProjects();
   fetchConversations(true);
   fetchStats();
-  showToast('تم تحديث البيانات من الجلسات');
+  showToast(t('toasts.refreshed'));
 });
 
 // Open Delete Modal for Single Conversation
 function openDeleteConvModal(e, id, title) {
   if (e) e.stopPropagation();
   deleteTarget = { type: 'conversation', id, title };
-  deleteModalTitle.textContent = 'تأكيد حذف المحادثة';
-  deleteModalType.textContent = 'حذف محادثة مفردة';
-  deleteModalDesc.textContent = 'هل أنت متأكد من رغبتك في حذف هذه المحادثة نهائياً من سجلات Antigravity؟';
+  deleteModalTitle.textContent = t('modals.delete.title');
+  deleteModalType.textContent = t('modals.delete.subtitle_chat');
+  deleteModalDesc.textContent = t('modals.delete.desc_chat');
   deleteModalInfo.innerHTML = `
-    <div><strong>العنوان:</strong> ${escapeHtml(title)}</div>
-    <div style="margin-top: 6px; font-size: 0.8rem; color: #94a3b8;"><strong>معرف الجلسة (ID):</strong> <code>${id}</code></div>
+    <div><strong>${t('modals.delete.title_label')}</strong> ${escapeHtml(title)}</div>
+    <div style="margin-top: 6px; font-size: 0.8rem; color: #94a3b8;"><strong>${t('modals.delete.id_label')}</strong> <code>${id}</code></div>
   `;
-  deleteModalWarning.textContent = '⚠️ سيتم حذف ملفات الجلسة وسجلاتها ومجلد الـ brain وقاعدة البيانات المرتبطة بها نهائياً.';
-  btnConfirmDelete.textContent = 'حذف المحادثة نهائياً';
+  deleteModalWarning.textContent = t('modals.delete.warning_chat');
+  btnConfirmDelete.textContent = t('modals.delete.confirm_chat_btn');
   deleteModal.classList.add('active');
 }
 
@@ -470,35 +619,35 @@ function openDeleteConvModal(e, id, title) {
 function openDeleteProjectModal(e, projectName, count) {
   if (e) e.stopPropagation();
   deleteTarget = { type: 'project', projectName, count };
-  deleteModalTitle.textContent = 'تأكيد حذف محادثات المشروع';
-  deleteModalType.textContent = 'حذف مشروع كامل';
-  deleteModalDesc.textContent = `هل أنت متأكد من رغبتك في حذف جميع المحادثات التابعة لمشروع "${projectName}"؟`;
+  deleteModalTitle.textContent = t('modals.delete.title');
+  deleteModalType.textContent = t('modals.delete.subtitle_project');
+  deleteModalDesc.textContent = t('modals.delete.desc_project', { project: projectName });
   deleteModalInfo.innerHTML = `
-    <div><strong>المشروع:</strong> ${escapeHtml(projectName)}</div>
-    <div style="margin-top: 6px;"><strong>إجمالي المحادثات:</strong> <span style="color: #ef4444; font-weight: bold;">${count} محادثة</span></div>
+    <div><strong>${t('modals.delete.project_label')}</strong> ${escapeHtml(projectName)}</div>
+    <div style="margin-top: 6px;"><strong>${t('modals.delete.chats_count_label')}</strong> <span style="color: #ef4444; font-weight: bold;">${count}</span></div>
     <div style="margin-top: 10px; font-size: 0.82rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(56, 189, 248, 0.2);">
-      💡 <strong>تنبيه للأمان:</strong> هذا الإجراء يحذف سجلات ومحادثات Antigravity فقط، ولن يتم المساس أو حذف أي من ملفات الكود البرمجي للمشروع المخزنة على جهازك.
+      ${t('modals.delete.project_safe_notice')}
     </div>
   `;
-  deleteModalWarning.textContent = '⚠️ سيتم حذف ملفات الـ brain وسجلات كافة محادثات هذا المشروع نهائياً.';
-  btnConfirmDelete.textContent = `حذف المشروع (${count} محادثة)`;
+  deleteModalWarning.textContent = t('modals.delete.warning_project');
+  btnConfirmDelete.textContent = t('modals.delete.confirm_project_btn', { count });
   deleteModal.classList.add('active');
 }
 
 // Delete Chat Button in Header
-btnDeleteChat.addEventListener('click', () => {
+btnDeleteChat?.addEventListener('click', () => {
   if (!currentConvData) return;
   openDeleteConvModal(null, currentConvData.id, currentConvData.title);
 });
 
 // Cancel Delete
-btnCancelDelete.addEventListener('click', () => {
+btnCancelDelete?.addEventListener('click', () => {
   deleteModal.classList.remove('active');
   deleteTarget = null;
 });
 
 // Close modal on background click
-deleteModal.addEventListener('click', (e) => {
+deleteModal?.addEventListener('click', (e) => {
   if (e.target === deleteModal) {
     deleteModal.classList.remove('active');
     deleteTarget = null;
@@ -506,12 +655,12 @@ deleteModal.addEventListener('click', (e) => {
 });
 
 // Confirm Delete Execution
-btnConfirmDelete.addEventListener('click', async () => {
+btnConfirmDelete?.addEventListener('click', async () => {
   if (!deleteTarget) return;
 
   btnConfirmDelete.disabled = true;
   const originalText = btnConfirmDelete.textContent;
-  btnConfirmDelete.textContent = 'جاري الحذف...';
+  btnConfirmDelete.textContent = t('modals.delete.deleting_state');
 
   try {
     if (deleteTarget.type === 'conversation') {
@@ -519,10 +668,9 @@ btnConfirmDelete.addEventListener('click', async () => {
       const res = await fetch(`/api/conversations/${id}/delete`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
-        showToast('تم حذف المحادثة وسجلاتها بنجاح 🗑️');
+        showToast(t('toasts.chat_deleted'));
         deleteModal.classList.remove('active');
 
-        // If the deleted conversation is the currently viewed one, reset the viewer
         if (currentConvId === id) {
           currentConvId = null;
           currentConvData = null;
@@ -530,12 +678,11 @@ btnConfirmDelete.addEventListener('click', async () => {
           emptyState.style.display = 'flex';
         }
 
-        // Refresh lists
         await fetchProjects();
         await fetchConversations(true);
         await fetchStats();
       } else {
-        showToast('تعذر حذف المحادثة: ' + (data.error || 'خطأ غير معروف'));
+        showToast(t('toasts.error_delete_chat'));
       }
     } else if (deleteTarget.type === 'project') {
       const projectName = deleteTarget.projectName;
@@ -546,10 +693,9 @@ btnConfirmDelete.addEventListener('click', async () => {
       });
       const data = await res.json();
       if (data.success) {
-        showToast(`تم حذف مشروع "${projectName}" (${data.deletedCount} محادثة) بنجاح 🗑️`);
+        showToast(t('toasts.project_deleted', { project: projectName, count: data.deletedCount }));
         deleteModal.classList.remove('active');
 
-        // Reset view if we were filtering by this project or viewing a chat from it
         if (currentProject === projectName) {
           currentProject = 'all';
         }
@@ -560,17 +706,16 @@ btnConfirmDelete.addEventListener('click', async () => {
           emptyState.style.display = 'flex';
         }
 
-        // Refresh lists
         await fetchProjects();
         await fetchConversations(true);
         await fetchStats();
       } else {
-        showToast('تعذر حذف المشروع: ' + (data.error || 'خطأ غير معروف'));
+        showToast(t('toasts.error_delete_project'));
       }
     }
   } catch (err) {
     console.error('Error during deletion:', err);
-    showToast('حدث خطأ أثناء الاتصال بالخادم للحذف');
+    showToast(t('toasts.error_delete_project'));
   } finally {
     btnConfirmDelete.disabled = false;
     btnConfirmDelete.textContent = originalText;
@@ -582,7 +727,7 @@ btnConfirmDelete.addEventListener('click', async () => {
 function openExportProjectModal(e, projectName, count) {
   if (e) e.stopPropagation();
   exportTargetProject = { projectName, count };
-  exportProjectName.textContent = `مشروع: ${projectName} (${count} محادثة)`;
+  exportProjectName.textContent = t('modals.export.subtitle', { project: projectName, count });
   
   if (!exportDestInput.value.trim()) {
     exportDestInput.value = 'D:\\Antigravity_Exports';
@@ -590,17 +735,17 @@ function openExportProjectModal(e, projectName, count) {
 
   exportResultBox.style.display = 'none';
   btnConfirmExport.disabled = false;
-  btnConfirmExport.textContent = 'بدء التصدير 📥';
+  btnConfirmExport.textContent = t('modals.export.start_btn');
   exportProjectModal.classList.add('active');
 }
 
 // Cancel / Close Export Modal
-btnCancelExport.addEventListener('click', () => {
+btnCancelExport?.addEventListener('click', () => {
   exportProjectModal.classList.remove('active');
   exportTargetProject = null;
 });
 
-exportProjectModal.addEventListener('click', (e) => {
+exportProjectModal?.addEventListener('click', (e) => {
   if (e.target === exportProjectModal) {
     exportProjectModal.classList.remove('active');
     exportTargetProject = null;
@@ -608,9 +753,9 @@ exportProjectModal.addEventListener('click', (e) => {
 });
 
 // Browse Folder via Windows Native Dialog
-btnBrowseFolder.addEventListener('click', async () => {
+btnBrowseFolder?.addEventListener('click', async () => {
   btnBrowseFolder.disabled = true;
-  btnBrowseFolder.textContent = 'جاري الفتح...';
+  btnBrowseFolder.textContent = t('modals.export.browsing_btn');
   try {
     const res = await fetch('/api/browse-folder', { method: 'POST' });
     const data = await res.json();
@@ -621,22 +766,22 @@ btnBrowseFolder.addEventListener('click', async () => {
     console.error('Browse folder error:', err);
   } finally {
     btnBrowseFolder.disabled = false;
-    btnBrowseFolder.textContent = '📁 تصفح...';
+    btnBrowseFolder.textContent = t('modals.export.browse_btn');
   }
 });
 
 // Confirm Project Export Execution
-btnConfirmExport.addEventListener('click', async () => {
+btnConfirmExport?.addEventListener('click', async () => {
   if (!exportTargetProject) return;
   const dest = exportDestInput.value.trim();
   if (!dest) {
-    showToast('يرجى كتابة أو اختيار مسار مجلد الوجهة');
+    showToast(t('toasts.prompt_select_dest'));
     exportDestInput.focus();
     return;
   }
 
   btnConfirmExport.disabled = true;
-  btnConfirmExport.textContent = 'جاري النسخ والتصدير... ⏳';
+  btnConfirmExport.textContent = t('modals.export.exporting_btn');
 
   try {
     const res = await fetch('/api/projects/export', {
@@ -652,28 +797,27 @@ btnConfirmExport.addEventListener('click', async () => {
     if (data.success) {
       lastExportedPath = data.projectExportDir;
       exportResultStatus.innerHTML = `
-        ✅ <strong>تم التصدير بنجاح!</strong><br>
-        تم نسخ <strong>${data.exportedCount}</strong> محادثة بكافة ملفاتها إلى:<br>
+        ${t('modals.export.success_msg', { count: data.exportedCount })}<br>
         <code style="display:inline-block; margin-top:6px; background:#0f172a; padding:4px 8px; border-radius:4px; color:#fff; word-break:break-all;">${data.projectExportDir}</code>
       `;
       exportResultBox.style.display = 'block';
-      btnConfirmExport.textContent = 'تم التصدير بنجاح ✅';
-      showToast(`تم تصدير مشروع "${exportTargetProject.projectName}" بنجاح! 📦`);
+      btnConfirmExport.textContent = t('modals.export.done_btn');
+      showToast(t('toasts.project_exported', { project: exportTargetProject.projectName }));
     } else {
-      showToast('حدث خطأ أثناء التصدير: ' + (data.error || 'خطأ غير معروف'));
+      showToast(t('toasts.error_export') + ': ' + (data.error || ''));
       btnConfirmExport.disabled = false;
-      btnConfirmExport.textContent = 'بدء التصدير 📥';
+      btnConfirmExport.textContent = t('modals.export.start_btn');
     }
   } catch (err) {
     console.error('Export error:', err);
-    showToast('فشل الاتصال بالخادم أثناء التصدير');
+    showToast(t('toasts.error_export_connection'));
     btnConfirmExport.disabled = false;
-    btnConfirmExport.textContent = 'بدء التصدير 📥';
+    btnConfirmExport.textContent = t('modals.export.start_btn');
   }
 });
 
 // Open Exported Folder in Windows Explorer
-btnOpenExportedFolder.addEventListener('click', async () => {
+btnOpenExportedFolder?.addEventListener('click', async () => {
   if (!lastExportedPath) return;
   try {
     await fetch('/api/open-folder-path', {
@@ -681,9 +825,9 @@ btnOpenExportedFolder.addEventListener('click', async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path: lastExportedPath })
     });
-    showToast('تم فتح المجلد في Windows Explorer 📂');
+    showToast(t('toasts.folder_opened'));
   } catch (e) {
-    showToast('تعذر فتح المجلد');
+    showToast(t('toasts.error_open_folder'));
   }
 });
 
@@ -698,7 +842,13 @@ function escapeHtml(text) {
     .replace(/'/g, '&#039;');
 }
 
-// Initial Boot
-fetchProjects();
-fetchConversations();
-fetchStats();
+// Initial Boot Sequence
+async function boot() {
+  await fetchAvailableLocales();
+  await setLanguage(currentLang);
+  fetchProjects();
+  fetchConversations();
+  fetchStats();
+}
+
+boot();

@@ -1,0 +1,107 @@
+{
+  "app": {
+    "title": "Antigravity Chat Studio",
+    "badge": "Session & Project Manager",
+    "language": "English",
+    "dir": "ltr"
+  },
+  "stats": {
+    "projects": "Projects:",
+    "total_chats": "Total Chats:",
+    "starred": "Starred ⭐:",
+    "refresh": "Refresh"
+  },
+  "sidebar": {
+    "active_projects": "Active Projects",
+    "all_chats": "All Conversations",
+    "starred_pinned": "Starred & Pinned",
+    "export_tooltip": "Export all conversations for project {project}",
+    "delete_tooltip": "Delete all conversations for project {project}"
+  },
+  "list": {
+    "search_placeholder": "Search titles, prompts, session IDs...",
+    "no_matches": "No matching conversations found",
+    "star_tooltip": "Toggle Star / Favorite",
+    "delete_chat_tooltip": "Delete this conversation",
+    "time_moments": "Just now",
+    "time_hours": "{hours}h ago",
+    "time_yesterday": "Yesterday",
+    "time_two_days": "2 days ago",
+    "time_days": "{days} days ago"
+  },
+  "viewer": {
+    "empty_title": "Select a conversation to view details",
+    "empty_desc": "Filter by project, search keywords, or rename and export sessions",
+    "rename_btn": "✏️ Rename",
+    "project_label": "Project:",
+    "id_label": "ID:",
+    "copy_id_btn": "📋 Copy ID",
+    "export_md_btn": "📥 Export",
+    "session_folder_btn": "📂 Session Folder",
+    "delete_chat_btn": "🗑️ Delete Chat",
+    "user_author": "👤 User",
+    "agent_author": "⚡ Antigravity Agent",
+    "no_messages": "No messages recorded in this session.",
+    "copy_id_toast": "Copied ID: {id}... to reference in Antigravity",
+    "copy_id_full_toast": "Copied ID: {id}"
+  },
+  "modals": {
+    "cancel": "Cancel",
+    "rename": {
+      "title": "Rename Conversation",
+      "placeholder": "Enter a distinctive title...",
+      "save_btn": "Save Title"
+    },
+    "delete": {
+      "title": "Confirm Deletion",
+      "subtitle_chat": "Delete Single Conversation",
+      "subtitle_project": "Delete Entire Project",
+      "desc_chat": "Are you sure you want to permanently delete this conversation from Antigravity records?",
+      "desc_project": "Are you sure you want to delete all conversations belonging to project \"{project}\"?",
+      "title_label": "Title:",
+      "id_label": "Session ID:",
+      "project_label": "Project:",
+      "chats_count_label": "Conversations to delete:",
+      "project_safe_notice": "💡 Safety Notice: This only deletes Antigravity sessions and trajectory records. Your actual project source code files will NEVER be touched or deleted.",
+      "warning_chat": "⚠️ The brain directory, SQLite database, and logs for this session will be permanently deleted.",
+      "warning_project": "⚠️ All brain session folders and trajectory databases for this project will be permanently removed.",
+      "confirm_chat_btn": "Delete Permanently",
+      "confirm_project_btn": "Delete Project ({count} chats)",
+      "deleting_state": "Deleting..."
+    },
+    "export": {
+      "title": "Export Project Conversations",
+      "subtitle": "Project: {project} ({count} chats)",
+      "desc": "All session logs, brain files, and SQLite databases will be copied to your selected destination:",
+      "dest_label": "Destination Folder Path:",
+      "dest_placeholder": "Select or type folder path (e.g. D:\\Backups)",
+      "browse_btn": "📁 Browse...",
+      "browsing_btn": "Opening...",
+      "opt_markdown": "Generate and export readable Markdown transcripts (.md)",
+      "opt_raw": "Copy raw Brain folders, JSONL logs, and SQLite DBs",
+      "start_btn": "Start Export 📥",
+      "exporting_btn": "Exporting & Copying... ⏳",
+      "done_btn": "Export Completed ✅",
+      "open_folder_btn": "📂 Open Exported Folder in Windows Explorer",
+      "success_msg": "✅ <strong>Exported successfully!</strong><br>Copied <strong>{count}</strong> conversations and records to:"
+    }
+  },
+  "toasts": {
+    "copied": "Copied to clipboard!",
+    "star_added": "Added to favorites ⭐",
+    "star_removed": "Removed from favorites",
+    "rename_saved": "Title saved successfully! ✏️",
+    "folder_opened": "Session folder opened in Windows Explorer 📂",
+    "md_exported": "Markdown transcript exported! 📥",
+    "refreshed": "Data refreshed from sessions",
+    "chat_deleted": "Conversation and records deleted 🗑️",
+    "project_deleted": "Project \"{project}\" ({count} chats) deleted 🗑️",
+    "project_exported": "Project \"{project}\" exported successfully! 📦",
+    "error_delete_chat": "Failed to delete conversation",
+    "error_delete_project": "Failed to delete project",
+    "error_export": "An error occurred during export",
+    "error_export_connection": "Server communication error during export",
+    "error_open_folder": "Failed to open folder",
+    "prompt_select_dest": "Please specify or select a destination folder"
+  }
+}
