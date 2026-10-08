@@ -1,3 +1,8 @@
+
+<img width="1902" height="915" alt="Animation" src="https://github.com/user-attachments/assets/0f845b3b-5bd4-4abe-a146-7a5c7f76d6ad" />
+
+
+
 # ⚡ Antigravity Chat Studio & Project Organizer
 
 <div align="center">
