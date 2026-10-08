@@ -1,0 +1,18 @@
+# Dependency directories
+node_modules/
+
+# User private session metadata
+data/custom_meta.json
+!data/custom_meta.example.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Operating System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+*.tmp

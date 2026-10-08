@@ -1,0 +1,10 @@
+{
+  "example-conversation-uuid-1": {
+    "customTitle": "[MyProject] Refactor authentication flow",
+    "starred": true
+  },
+  "example-conversation-uuid-2": {
+    "customTitle": "[API] Build user profile endpoint",
+    "starred": false
+  }
+}

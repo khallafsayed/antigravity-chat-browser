@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity Chat Studio & Project Organizer</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Markdown parser library from unpkg or inline fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-logo">⚡</div>
+      <div class="brand-title">Antigravity Chat Studio</div>
+      <span class="brand-badge">إدارة ومزامنة المحادثات</span>
+    </div>
+
+    <div class="header-stats">
+      <div class="stat-pill">
+        <span>المشاريع:</span>
+        <span class="stat-num" id="statProjects">0</span>
+      </div>
+      <div class="stat-pill">
+        <span>إجمالي المحادثات:</span>
+        <span class="stat-num" id="statConvs">0</span>
+      </div>
+      <div class="stat-pill">
+        <span>المفضلة ⭐:</span>
+        <span class="stat-num" id="statStarred">0</span>
+      </div>
+      <button class="btn-refresh" id="btnRefresh" title="تحديث السجلات">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+        </svg>
+        تحديث
+      </button>
+    </div>
+  </header>
+
+  <!-- Main 3-Column Layout -->
+  <main class="app-container">
+
+    <!-- Column 1: Projects Sidebar -->
+    <aside class="projects-panel">
+      <div class="panel-header">
+        <span>المشاريع النشطة</span>
+        <span id="projectsCountBadge" class="brand-badge">0</span>
+      </div>
+      <ul class="projects-list" id="projectsList">
+        <!-- Rendered dynamically -->
+      </ul>
+    </aside>
+
+    <!-- Column 2: Conversations List -->
+    <section class="conversations-panel">
+      <div class="search-box-container">
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="searchInput" placeholder="بحث في عناوين ونصوص المحادثات...">
+        </div>
+      </div>
+      <div class="conversations-list" id="conversationsList">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Column 3: Chat Viewer Area -->
+    <section class="chat-viewer" id="chatViewer">
+      <div class="chat-empty-state" id="emptyState">
+        <div class="chat-empty-icon">💬</div>
+        <h3>اختر محادثة لعرض تفاصيلها</h3>
+        <p>يمكنك تصفية المحادثات حسب المشروع أو البحث عنها وإعادة تسميتها</p>
+      </div>
+
+      <!-- Active Chat Content -->
+      <div id="activeChatContent" style="display: none; height: 100%; flex-direction: column;">
+        <!-- Chat Header -->
+        <div class="chat-header">
+          <div class="chat-header-info">
+            <div class="chat-header-title-row">
+              <h2 class="chat-header-title" id="chatTitle">عنوان المحادثة</h2>
+              <button class="btn-rename" id="btnOpenRename" title="تغيير اسم المحادثة">
+                ✏️ تسمية
+              </button>
+            </div>
+            <div class="chat-header-meta">
+              <span>المشروع: <strong id="chatProject" style="color: #cbd5e1;"></strong></span>
+              <span>•</span>
+              <span>المعرف: <code class="id-badge" id="chatIdBadge" title="انقر لنسخ المعرف لاستدعائه في Antigravity"></code></span>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <button class="action-btn" id="btnCopyId" title="نسخ المعرف">
+              📋 نسخ الـ ID
+            </button>
+            <button class="action-btn" id="btnExportMd" title="تصدير كملف Markdown">
+              📥 تصدير
+            </button>
+            <button class="action-btn" id="btnOpenFolder" title="فتح مجلد الجلسة في Windows Explorer">
+              📂 مجلد الجلسة
+            </button>
+            <button class="action-btn btn-danger-action" id="btnDeleteChat" title="حذف هذه المحادثة نهائياً">
+              🗑️ حذف المحادثة
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="messages-container" id="messagesContainer">
+          <!-- Rendered messages -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rename Modal -->
+  <div class="modal-overlay" id="renameModal">
+    <div class="modal-box">
+      <h3 class="modal-title">إعادة تسمية المحادثة</h3>
+      <input type="text" class="modal-input" id="renameInput" placeholder="أدخل اسماً مميزاً للمحادثة...">
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelRename">إلغاء</button>
+        <button class="btn-primary" id="btnSaveRename">حفظ التسمية</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-box modal-box-danger">
+      <div class="modal-danger-header">
+        <div class="modal-danger-icon">🗑️</div>
+        <div>
+          <h3 class="modal-title" id="deleteModalTitle">تأكيد الحذف</h3>
+          <p class="modal-subtitle" id="deleteModalType">حذف محادثة</p>
+        </div>
+      </div>
+      <p class="modal-desc" id="deleteModalDesc">هل أنت متأكد من رغبتك في حذف هذا العنصر نهائياً؟</p>
+      <div class="delete-info-card" id="deleteModalInfo"></div>
+      <p class="delete-warning-note" id="deleteModalWarning">⚠️ هذا الإجراء نهائي ولا يمكن التراجع عنه.</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelDelete">إلغاء</button>
+        <button class="btn-danger-confirm" id="btnConfirmDelete">حذف نهائي</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Project Modal -->
+  <div class="modal-overlay" id="exportProjectModal">
+    <div class="modal-box">
+      <div class="modal-export-header">
+        <div class="modal-export-icon">📦</div>
+        <div>
+          <h3 class="modal-title">تصدير محادثات المشروع</h3>
+          <p class="modal-subtitle" id="exportProjectName" style="color: #818cf8;">اسم المشروع</p>
+        </div>
+      </div>
+      
+      <p class="modal-desc">
+        سيتم نسخ كافة ملفات وسجلات المحادثات، ملفات الـ Brain، وقواعد بيانات الجلسات إلى المجلد الذي تحدده أدناه:
+      </p>
+
+      <div class="export-field-group">
+        <label class="field-label">مجلد الوجهة لحفظ المحادثات (Destination Folder):</label>
+        <div class="folder-input-wrapper">
+          <input type="text" class="modal-input folder-input" id="exportDestInput" placeholder="اختر أو اكتب مسار المجلد (مثال: D:\Backups)">
+          <button class="btn-browse" id="btnBrowseFolder" type="button" title="استعراض مجلدات الجهاز">
+            📁 تصفح...
+          </button>
+        </div>
+      </div>
+
+      <div class="export-options">
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkIncludeMarkdown" checked>
+          <span>توليد وتصدير ملفات Markdown سهلة القراءة لكل محادثة (.md)</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="chkCopyRawBrain" checked disabled>
+          <span>نسخ مجلدات الـ Brain الأصلية وسجلات JSONL وقواعد بيانات SQLite</span>
+        </label>
+      </div>
+
+      <!-- Result / Success Box -->
+      <div class="export-result-box" id="exportResultBox" style="display: none;">
+        <div class="export-result-status" id="exportResultStatus"></div>
+        <button class="btn-secondary btn-sm" id="btnOpenExportedFolder" type="button" style="margin-top: 10px;">
+          📂 فتح المجلد المُصدّر في Windows Explorer
+        </button>
+      </div>
+
+      <div class="modal-actions" id="exportModalActions">
+        <button class="btn-secondary" id="btnCancelExport">إلغاء</button>
+        <button class="btn-primary" id="btnConfirmExport">بدء التصدير 📥</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">تم النسخ بنجاح!</div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "antigravity-chat-browser",
+  "version": "1.0.0",
+  "description": "A modern local dashboard & manager for Google Antigravity IDE conversations with project categorization, custom renaming, instant search, transcript reader, deletion, and full project export.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "antigravity",
+    "antigravity-ide",
+    "google-deepmind",
+    "ai-agent",
+    "chat-manager",
+    "transcript-viewer",
+    "offline-first",
+    "zero-dependencies"
+  ],
+  "author": "Khallaf Sayed",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
